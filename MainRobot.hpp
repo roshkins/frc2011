@@ -28,6 +28,8 @@
 
 #pragma once
 #include "defs.h"
+#include "Arm.hpp"
+#include "Drive.hpp"
 
 class MainRobot : public SimpleRobot
 {
@@ -38,7 +40,7 @@ public:
 	void OperatorControl();
 	
 private:
-	RobotDrive *mRobotDrive;
+	Drive *mDrive;
 	Joystick *mJoystick;
 	Watchdog *mWatchdog;
 	Arm *mArm;

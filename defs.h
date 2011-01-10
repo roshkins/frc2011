@@ -37,12 +37,12 @@
 #include <time.h>
 #include <string>
 #include "Logger.hpp"
-#include "Arm.hpp"
 
 // **************************************
 // Input
 // **************************************
 #define JOYSTICK_1 1
+#define JOYSTICK_2 2
 
 // **************************************
 // Output

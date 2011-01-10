@@ -26,57 +26,39 @@
  * or implied, of Colin Warren.
  */
 
-#include "MainRobot.hpp"
+#include "Drive.hpp"
 
-MainRobot::MainRobot(void)
+Drive::Drive()
 {
-	mDrive = new Drive();
-	mWatchdog = &GetWatchdog();
-	mArm = new Arm();
-	mLogger = &Logger::GetInstance();
+	mRobotDrive = new RobotDrive(DRIVE_MOTOR_1, DRIVE_MOTOR_2);
+	mJoystick1 = new Joystick(JOYSTICK_1);
+	mJoystick2 = new Joystick(JOYSTICK_2);
 	
-	mWatchdog->SetExpiration(0.1);
-	mDrive->setDriveMode(Drive::TANK);
+	mRobotDrive->SetExpiration(0.1);
+	mRobotDrive->SetSafetyEnabled(true);
 }
 
-MainRobot::~MainRobot()
+Drive::~Drive()
 {
-	delete mDrive;
-	// Don't delete watchdog (we didn't allocate it)
-	delete mArm;
-	// Don't delete logger (shared instance)
+	delete mRobotDrive;
+	delete mJoystick1;
+	delete mJoystick2;
 }
 
-void MainRobot::Autonomous(void)
+void Drive::setDriveMode(DriveMode mode)
 {
-	// @author Colin "Danger" Warren
-	mWatchdog->SetEnabled(false);
-	
-	// Follow line (automate this)
-	
-	// Raise Arm to highest pegs
-	mArm->ToHighPegs();
+	mMode = mode;
 }
 
-void MainRobot::OperatorControl(void)
+void Drive::Update()
 {
-	// Enables the watchdog (if comms are dropped, commit suicide)
-	mWatchdog->SetEnabled(true);
-	
-	time_t startTime;
-	
-	while (IsOperatorControl())
+	switch (mMode)
 	{
-		// Grab start time
-		startTime = time(NULL);
-		
-		mWatchdog->Feed();
-		mDrive->Update();
-		
-		// Main loop time should be 50ms, if greater, log a warning
-		if (time(NULL) > startTime + 0.005)
-			mLogger->warning("Main loop took more than 50ms!");
-		else
-			Wait((startTime + 0.005) - time(NULL));
+	case ARCADE:
+		mRobotDrive->ArcadeDrive(mJoystick1);
+		break;
+	case TANK:
+		mRobotDrive->TankDrive(mJoystick1, mJoystick2);
+		break;
 	}
 }

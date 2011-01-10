@@ -26,57 +26,25 @@
  * or implied, of Colin Warren.
  */
 
-#include "MainRobot.hpp"
+#pragma once
+#include "defs.h"
 
-MainRobot::MainRobot(void)
+class Drive
 {
-	mDrive = new Drive();
-	mWatchdog = &GetWatchdog();
-	mArm = new Arm();
-	mLogger = &Logger::GetInstance();
-	
-	mWatchdog->SetExpiration(0.1);
-	mDrive->setDriveMode(Drive::TANK);
-}
-
-MainRobot::~MainRobot()
-{
-	delete mDrive;
-	// Don't delete watchdog (we didn't allocate it)
-	delete mArm;
-	// Don't delete logger (shared instance)
-}
-
-void MainRobot::Autonomous(void)
-{
-	// @author Colin "Danger" Warren
-	mWatchdog->SetEnabled(false);
-	
-	// Follow line (automate this)
-	
-	// Raise Arm to highest pegs
-	mArm->ToHighPegs();
-}
-
-void MainRobot::OperatorControl(void)
-{
-	// Enables the watchdog (if comms are dropped, commit suicide)
-	mWatchdog->SetEnabled(true);
-	
-	time_t startTime;
-	
-	while (IsOperatorControl())
+public:
+	enum DriveMode
 	{
-		// Grab start time
-		startTime = time(NULL);
-		
-		mWatchdog->Feed();
-		mDrive->Update();
-		
-		// Main loop time should be 50ms, if greater, log a warning
-		if (time(NULL) > startTime + 0.005)
-			mLogger->warning("Main loop took more than 50ms!");
-		else
-			Wait((startTime + 0.005) - time(NULL));
-	}
-}
+		ARCADE,
+		TANK
+	};
+	
+	Drive();
+	~Drive();
+	void setDriveMode(DriveMode mode);
+	void Update();
+private:
+	DriveMode mMode;
+	RobotDrive *mRobotDrive;
+	Joystick *mJoystick1;
+	Joystick *mJoystick2;
+};
