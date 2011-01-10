@@ -82,10 +82,6 @@ void Logger::print(std::string data)
 
 void Logger::draw()
 {
-	mOut->PrintfLine(DriverStationLCD::kUser_Line1, mLines[0].c_str());
-	mOut->PrintfLine(DriverStationLCD::kUser_Line2, mLines[1].c_str());
-	mOut->PrintfLine(DriverStationLCD::kUser_Line3, mLines[2].c_str());
-	mOut->PrintfLine(DriverStationLCD::kUser_Line4, mLines[3].c_str());
-	mOut->PrintfLine(DriverStationLCD::kUser_Line5, mLines[4].c_str());
-	mOut->PrintfLine(DriverStationLCD::kUser_Line6, mLines[5].c_str());
+	for (int i = 0; i < 6; i++)
+		mOut->PrintfLine((DriverStationLCD::Line) i, mLines[i].c_str());
 }
