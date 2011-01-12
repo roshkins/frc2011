@@ -25,46 +25,27 @@
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of Marin Robotics.
  */
-
 #pragma once
+#include "defs.h"
 
-// **************************************
-// Headers
-// **************************************
-#include <WPILib.h>
-#include <taskLib.h>
-#include <DriverStationLCD.h>
-#include <time.h>
-#include <string>
-#include "Logger.hpp"
-
-// **************************************
-// Input
-// **************************************
-#define JOYSTICK_1 1
-#define JOYSTICK_2 2
-
-// **************************************
-// Output
-// **************************************
-#define DRIVE_MOTOR_1 1
-#define DRIVE_MOTOR_2 2
-#define DRIVE_MOTOR_3 3
-#define DRIVE_MOTOR_4 4
-
-#define ARM_MOTOR_1 5
-#define ARM_MOTOR_2 6
-#define ARM_MOTOR_3 7
-#define ARM_CLAMP 8
-
-// **************************************
-// Functions/Macros
-// **************************************
-#define CHANGE_TASK(__NAME, __TASK, __FUNC, ...) \
-	if (__TASK) \
-	{ \
-		(__TASK)->Stop(); \
-		delete (__TASK); \
-	} \
-	(__TASK) = new Task(__NAME, (FUNCPTR) __FUNC); \
-	(__TASK)->Start(__VA_ARGS__);
+class Clamp
+{
+public:
+	Clamp(int motor_slot, int encoder_slot1, int encoder_slot2);
+	~Clamp();
+	
+	void Open();
+	void Close();
+	bool IsOpen();
+private:
+	// Represents the state of the clamp
+	enum ClampState
+	{
+		OPEN,
+		CLOSED
+	};
+	
+	ClampState mState;
+	Jaguar *mMotor;
+	Encoder *mEncoder;
+};

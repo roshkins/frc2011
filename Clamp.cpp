@@ -26,45 +26,30 @@
  * or implied, of Marin Robotics.
  */
 
-#pragma once
+#include "Clamp.hpp"
 
-// **************************************
-// Headers
-// **************************************
-#include <WPILib.h>
-#include <taskLib.h>
-#include <DriverStationLCD.h>
-#include <time.h>
-#include <string>
-#include "Logger.hpp"
+Clamp::Clamp(int motor_slot, int encoder_slot1, int encoder_slot2)
+{
+	mMotor = new Jaguar(motor_slot);
+	mEncoder = new Encoder(encoder_slot1, encoder_slot2, true, Encoder::k4X);
+}
 
-// **************************************
-// Input
-// **************************************
-#define JOYSTICK_1 1
-#define JOYSTICK_2 2
+Clamp::~Clamp()
+{
+	delete mMotor;
+}
 
-// **************************************
-// Output
-// **************************************
-#define DRIVE_MOTOR_1 1
-#define DRIVE_MOTOR_2 2
-#define DRIVE_MOTOR_3 3
-#define DRIVE_MOTOR_4 4
+void Clamp::Open()
+{
+	
+}
 
-#define ARM_MOTOR_1 5
-#define ARM_MOTOR_2 6
-#define ARM_MOTOR_3 7
-#define ARM_CLAMP 8
+void Clamp::Close()
+{
+	
+}
 
-// **************************************
-// Functions/Macros
-// **************************************
-#define CHANGE_TASK(__NAME, __TASK, __FUNC, ...) \
-	if (__TASK) \
-	{ \
-		(__TASK)->Stop(); \
-		delete (__TASK); \
-	} \
-	(__TASK) = new Task(__NAME, (FUNCPTR) __FUNC); \
-	(__TASK)->Start(__VA_ARGS__);
+bool Clamp::IsOpen()
+{
+	return (mState == OPEN);
+}

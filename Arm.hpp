@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Colin Warren <colin@colinwyattwarren.com>. All rights reserved.
+ * Copyright 2011 Marin Robotics (see AUTHORS file). All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -11,9 +11,9 @@
  *      of conditions and the following disclaimer in the documentation and/or other materials
  *      provided with the distribution.
  * 
- * THIS SOFTWARE IS PROVIDED BY Colin Warren ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY Marin Robotics ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Colin Warren OR
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Marin Robotics OR
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
@@ -23,11 +23,14 @@
  * 
  * The views and conclusions contained in the software and documentation are those of the
  * authors and should not be interpreted as representing official policies, either expressed
- * or implied, of Colin Warren.
+ * or implied, of Marin Robotics.
  */
 
 #pragma once
 #include "defs.h"
+#include "ArmJoint.hpp"
+#include "Clamp.hpp"
+#include <cstdarg>
 
 class Arm
 {
@@ -61,17 +64,28 @@ private:
 		HIGH_PEGS
 	};
 	
-	// Represents the state of the clamp
-	enum ClampState
+	/* I really have to commend FIRST for their dedication
+	 * to a completely insane way to pass arguments. Maybe
+	 * they should have us create Jaguars by calling the
+	 * CreateVictorInstanceByReferenceImplementation method
+	 * in the ElectricServo class.
+	 * 
+	 * Why can't they just let me pass a void** in?
+	 */
+	struct DataRepHackThing
 	{
-		OPEN,
-		CLOSED
+		ArmJoint *aj1;
+		ArmJoint *aj2;
+		Clamp *cl;
 	};
 	
 	Task *mCurrentTask;     // Currently executing task
 	Task *mClampTask;       // Currently executing clamp task
 	ArmState mArmState;     // State of the arm
-	ClampState mClampState; // State of the clamp
+	ArmJoint *mArmJoint1;   // Joint #1
+	ArmJoint *mArmJoint2;   // Joint #2
+	Clamp *mClamp;          // Clamp
+	DataRepHackThing mArgs; // Horrible thing
 };
 
 /* I thoroughly hate that I have to do this, but unfortunately
@@ -81,10 +95,12 @@ private:
 void __Arm_ToLowPegs();
 void __Arm_ToMediumPegs();
 void __Arm_ToHighPegs();
-void __Arm_OpenClamp();
-void __Arm_CloseClamp();
+void __Arm_OpenClamp(...);
+void __Arm_CloseClamp(...);
+void __Arm_OpenClampImpl(Clamp *clamp);
+void __Arm_CloseClampImpl(Clamp *clamp);
 
 // Unfortunately, macros calling macros is the simplest way to do this.
-#define ARM_CHANGE_TASK(__FUNC) CHANGE_TASK("arm", mCurrentTask, __FUNC)
-#define ARM_CLAMP_CHANGE_TASK(__FUNC) CHANGE_TASK("clamp", mClampTask, __FUNC)
+#define ARM_CHANGE_TASK(__FUNC, ...) CHANGE_TASK("arm", mCurrentTask, __FUNC, __VA_ARGS__)
+#define ARM_CLAMP_CHANGE_TASK(__FUNC, ...) CHANGE_TASK("clamp", mClampTask, __FUNC, __VA_ARGS__)
 

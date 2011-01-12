@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Colin Warren <colin@colinwyattwarren.com>. All rights reserved.
+ * Copyright 2011 Marin Robotics (see AUTHORS file). All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without modification, are
  * permitted provided that the following conditions are met:
@@ -11,9 +11,9 @@
  *      of conditions and the following disclaimer in the documentation and/or other materials
  *      provided with the distribution.
  * 
- * THIS SOFTWARE IS PROVIDED BY Colin Warren ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY Marin Robotics ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Colin Warren OR
+ * FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Marin Robotics OR
  * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
  * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
  * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
@@ -23,7 +23,7 @@
  * 
  * The views and conclusions contained in the software and documentation are those of the
  * authors and should not be interpreted as representing official policies, either expressed
- * or implied, of Colin Warren.
+ * or implied, of Marin Robotics.
  */
 
 #include "Arm.hpp"
@@ -33,7 +33,9 @@ Arm::Arm()
 	mCurrentTask = NULL;
 	mClampTask = NULL;
 	mArmState = RETRACTED;
-	mClampState = CLOSED;
+	mArgs.aj1 = mArmJoint1;
+	mArgs.aj2 = mArmJoint2;
+	mArgs.cl = mClamp;
 }
 
 Arm::~Arm()
@@ -49,7 +51,7 @@ bool Arm::IsRetracted()
 
 bool Arm::IsClampOpen()
 {
-	return (mClampState == OPEN);
+	return mClamp->IsOpen();
 }
 
 bool Arm::AtLowPegs()
@@ -71,6 +73,7 @@ bool Arm::AtHighPegs()
 void __Arm_ToLowPegs()
 {
 	// TODO: Implement Arm::ToLowPegs
+	
 }
 
 void __Arm_ToMediumPegs()
@@ -83,14 +86,24 @@ void __Arm_ToHighPegs()
 	// TODO: Implement Arm::ToHighPegs
 }
 
-void __Arm_OpenClamp()
+void __Arm_OpenClamp(...)
 {
-	// TODO: Implement Arm::OpenClamp
+	
 }
 
-void __Arm_CloseClamp()
+void __Arm_CloseClamp(...)
 {
-	// TODO: Implement Arm::CloseClamp
+	
+}
+
+void __Arm_OpenClampImpl(Clamp *clamp)
+{
+	clamp->Open();
+}
+
+void __Arm_CloseClampImpl(Clamp *clamp)
+{
+	clamp->Close();
 }
 
 void Arm::ToLowPegs()
@@ -117,13 +130,11 @@ void Arm::ToHighPegs()
 void Arm::OpenClamp()
 {
 	// TODO: Base off of sensor values, don't assume
-	mClampState = OPEN;
-	ARM_CLAMP_CHANGE_TASK(__Arm_OpenClamp);
+	ARM_CLAMP_CHANGE_TASK(__Arm_OpenClamp, (UINT32)(&mArgs));
 }
 
 void Arm::CloseClamp()
 {
 	// TODO: Base off of sensor values, don't assume
-	mClampState = CLOSED;
-	ARM_CLAMP_CHANGE_TASK(__Arm_CloseClamp);
+	ARM_CLAMP_CHANGE_TASK(__Arm_CloseClamp, (UINT32)(&mArgs));
 }

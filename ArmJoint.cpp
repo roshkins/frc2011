@@ -26,45 +26,42 @@
  * or implied, of Marin Robotics.
  */
 
-#pragma once
+#include "ArmJoint.hpp"
 
-// **************************************
-// Headers
-// **************************************
-#include <WPILib.h>
-#include <taskLib.h>
-#include <DriverStationLCD.h>
-#include <time.h>
-#include <string>
-#include "Logger.hpp"
+ArmJoint::ArmJoint(int motor_port, int encoder_port1, int encoder_port2)
+{
+	mMotor = new Jaguar(motor_port);
+	mEncoder = new Encoder(encoder_port1, encoder_port2, true, Encoder::k4X);
+}
 
-// **************************************
-// Input
-// **************************************
-#define JOYSTICK_1 1
-#define JOYSTICK_2 2
+ArmJoint::~ArmJoint()
+{
+	delete mMotor;
+	delete mEncoder;
+}
 
-// **************************************
-// Output
-// **************************************
-#define DRIVE_MOTOR_1 1
-#define DRIVE_MOTOR_2 2
-#define DRIVE_MOTOR_3 3
-#define DRIVE_MOTOR_4 4
-
-#define ARM_MOTOR_1 5
-#define ARM_MOTOR_2 6
-#define ARM_MOTOR_3 7
-#define ARM_CLAMP 8
-
-// **************************************
-// Functions/Macros
-// **************************************
-#define CHANGE_TASK(__NAME, __TASK, __FUNC, ...) \
-	if (__TASK) \
-	{ \
-		(__TASK)->Stop(); \
-		delete (__TASK); \
-	} \
-	(__TASK) = new Task(__NAME, (FUNCPTR) __FUNC); \
-	(__TASK)->Start(__VA_ARGS__);
+void ArmJoint::ToAngle(int angle)
+{
+	// TODO: Refactor into individual module (usable by both ArmJoint and Clamp)
+	int diff = abs(angle - mEncoder->Get() % 360);
+	
+	mMotor->Set(1.0f);
+	Wait(0.0015);
+	mMotor->Set(0.0f);
+	
+	int new_diff = abs(angle - mEncoder->Get() % 360);
+	
+	while (new_diff > diff)
+	{
+		mMotor->Set(1.0f);
+		new_diff = abs(angle - mEncoder->Get() % 360);
+		Wait(0.0005); // 5ms is the update time for a Jaguar
+	}
+	
+	while (new_diff < diff)
+	{
+		mMotor->Set(1.0f);
+		new_diff = abs(angle - mEncoder->Get() % 360);
+		Wait(0.0005); // 5ms is the update time for a Jaguar
+	}
+}

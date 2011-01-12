@@ -25,46 +25,23 @@
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of Marin Robotics.
  */
-
 #pragma once
+#include "defs.h"
+#include <math.h>
 
-// **************************************
-// Headers
-// **************************************
-#include <WPILib.h>
-#include <taskLib.h>
-#include <DriverStationLCD.h>
-#include <time.h>
-#include <string>
-#include "Logger.hpp"
+class ArmJoint
+{
+public:
+	ArmJoint(int motor_port, int encoder_port1, int encoder_port2);
+	~ArmJoint();
+	
+	void ToAngle(int angle);
+private:
+	Task *mCurrentTask;
+	Jaguar *mMotor;
+	Encoder *mEncoder;
+};
 
-// **************************************
-// Input
-// **************************************
-#define JOYSTICK_1 1
-#define JOYSTICK_2 2
+void __ArmJoint_ToAngle(int angle);
 
-// **************************************
-// Output
-// **************************************
-#define DRIVE_MOTOR_1 1
-#define DRIVE_MOTOR_2 2
-#define DRIVE_MOTOR_3 3
-#define DRIVE_MOTOR_4 4
-
-#define ARM_MOTOR_1 5
-#define ARM_MOTOR_2 6
-#define ARM_MOTOR_3 7
-#define ARM_CLAMP 8
-
-// **************************************
-// Functions/Macros
-// **************************************
-#define CHANGE_TASK(__NAME, __TASK, __FUNC, ...) \
-	if (__TASK) \
-	{ \
-		(__TASK)->Stop(); \
-		delete (__TASK); \
-	} \
-	(__TASK) = new Task(__NAME, (FUNCPTR) __FUNC); \
-	(__TASK)->Start(__VA_ARGS__);
+#define ARMJOINT_CHANGE_TASK(__FUNC, ...) CHANGE_TASK("armjoint", mCurrentTask, __VA_ARGS__)
