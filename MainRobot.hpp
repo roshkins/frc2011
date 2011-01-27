@@ -45,12 +45,18 @@ private:
 	Watchdog *mWatchdog;
 	Arm *mArm;
 	Logger *mLogger;
+	DriverStation *mDriverStation;
+	DigitalInput *mLineSensorLeft;
+	DigitalInput *mLineSensorCenter;
+	DigitalInput *mLineSensorRight;
+	Jaguar *mTestJag1;
+	Jaguar *mTestJag2;
 };
 
-extern "C" {
+/*extern "C" {
 	INT32 FRC_UserProgram_StartupLibraryInit()
 	{
 		RobotBase::startRobotTask((FUNCPTR)(new MainRobot()));
 		return 0;
 	}
-}
+}*/

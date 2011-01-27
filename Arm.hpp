@@ -31,6 +31,7 @@
 #include "ArmJoint.hpp"
 #include "Clamp.hpp"
 #include <cstdarg>
+#include <list>
 
 class Arm
 {
@@ -72,12 +73,6 @@ private:
 	 * 
 	 * Why can't they just let me pass a void** in?
 	 */
-	struct DataRepHackThing
-	{
-		ArmJoint *aj1;
-		ArmJoint *aj2;
-		Clamp *cl;
-	};
 	
 	Task *mCurrentTask;     // Currently executing task
 	Task *mClampTask;       // Currently executing clamp task
@@ -85,7 +80,6 @@ private:
 	ArmJoint *mArmJoint1;   // Joint #1
 	ArmJoint *mArmJoint2;   // Joint #2
 	Clamp *mClamp;          // Clamp
-	DataRepHackThing mArgs; // Horrible thing
 };
 
 /* I thoroughly hate that I have to do this, but unfortunately
@@ -97,8 +91,6 @@ void __Arm_ToMediumPegs();
 void __Arm_ToHighPegs();
 void __Arm_OpenClamp(...);
 void __Arm_CloseClamp(...);
-void __Arm_OpenClampImpl(Clamp *clamp);
-void __Arm_CloseClampImpl(Clamp *clamp);
 
 // Unfortunately, macros calling macros is the simplest way to do this.
 #define ARM_CHANGE_TASK(__FUNC, ...) CHANGE_TASK("arm", mCurrentTask, __FUNC, __VA_ARGS__)

@@ -44,6 +44,15 @@
 #define JOYSTICK_1 1
 #define JOYSTICK_2 2
 
+#define ARM_ENCODER_1_1 1
+#define ARM_ENCODER_1_2 2
+#define ARM_ENCODER_2_1 3
+#define ARM_ENCODER_2_2 4
+
+#define LINE_SENSOR_1
+#define LINE_SENSOR_2
+#define LINE_SENSOR_3
+
 // **************************************
 // Output
 // **************************************
@@ -54,8 +63,7 @@
 
 #define ARM_MOTOR_1 5
 #define ARM_MOTOR_2 6
-#define ARM_MOTOR_3 7
-#define ARM_CLAMP 8
+#define ARM_CLAMP 7
 
 // **************************************
 // Functions/Macros

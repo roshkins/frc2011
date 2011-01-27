@@ -30,13 +30,18 @@
 
 MainRobot::MainRobot(void)
 {
-	mDrive = new Drive();
+	//mDrive = new Drive();
 	mWatchdog = &GetWatchdog();
-	mArm = new Arm();
+	//mArm = new Arm();
 	mLogger = &Logger::GetInstance();
-	
+	/*mLineSensorLeft = new DigitalInput(LINE_SENSOR_1);
+	mLineSensorCenter = new DigitalInput(LINE_SENSOR_2);
+	mLineSensorRight = new DigitalInput(LINE_SENSOR_3);*/
+	mTestJag1 = new Jaguar(1);
+	mTestJag2 = new Jaguar(2);
 	mWatchdog->SetExpiration(0.1);
-	mDrive->setDriveMode(Drive::TANK);
+	//mDrive->setDriveMode(Drive::TANK);
+	mJoystick = new Joystick(1);
 }
 
 MainRobot::~MainRobot()
@@ -55,15 +60,18 @@ void MainRobot::Autonomous(void)
 	// Follow line (automate this)
 	
 	// Raise Arm to highest pegs
-	mArm->ToHighPegs();
+	//mArm->ToHighPegs();
 }
 
 void MainRobot::OperatorControl(void)
-{
+{	
 	// Enables the watchdog (if comms are dropped, commit suicide)
-	mWatchdog->SetEnabled(true);
+	mWatchdog->SetEnabled(false);
 	
 	time_t startTime;
+	
+	mTestJag1->Set(1.0f);
+	mTestJag2->Set(1.0f);
 	
 	while (IsOperatorControl())
 	{
@@ -73,10 +81,17 @@ void MainRobot::OperatorControl(void)
 		mWatchdog->Feed();
 		mDrive->Update();
 		
+		Wait(0.05);
+		
 		// Main loop time should be 50ms, if greater, log a warning
 		if (time(NULL) > startTime + 0.005)
-			mLogger->warning("Main loop took more than 50ms!");
+			mLogger->warning("Main loop took more than 5ms!");
 		else
 			Wait((startTime + 0.005) - time(NULL));
+		//mLogger->info("Test prog.");
 	}
+	mTestJag1->Set(0.0f);
+	mTestJag2->Set(0.0f);
 }
+
+START_ROBOT_CLASS(MainRobot);

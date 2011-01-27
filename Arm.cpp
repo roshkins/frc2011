@@ -28,14 +28,30 @@
 
 #include "Arm.hpp"
 
+struct DataRepHackThing
+{
+	ArmJoint *aj1;
+	ArmJoint *aj2;
+	Clamp *cl;
+};
+
+static DataRepHackThing *mArgs; // I **HATE** VxWorks; if only they could just give me an
+                                // embedded Debian system and the root password.
+
 Arm::Arm()
 {
 	mCurrentTask = NULL;
 	mClampTask = NULL;
 	mArmState = RETRACTED;
-	mArgs.aj1 = mArmJoint1;
-	mArgs.aj2 = mArmJoint2;
-	mArgs.cl = mClamp;
+	mArmJoint1 = new ArmJoint(ARM_MOTOR_1, ARM_ENCODER_1_1, ARM_ENCODER_1_2);
+	mArmJoint2 = new ArmJoint(ARM_MOTOR_2, ARM_ENCODER_2_1, ARM_ENCODER_2_2);
+	if (!mArgs)
+	{
+		mArgs = new DataRepHackThing();
+		mArgs->aj1 = mArmJoint1;
+		mArgs->aj2 = mArmJoint2;
+		mArgs->cl = mClamp;
+	}
 }
 
 Arm::~Arm()
@@ -73,7 +89,6 @@ bool Arm::AtHighPegs()
 void __Arm_ToLowPegs()
 {
 	// TODO: Implement Arm::ToLowPegs
-	
 }
 
 void __Arm_ToMediumPegs()
@@ -88,22 +103,12 @@ void __Arm_ToHighPegs()
 
 void __Arm_OpenClamp(...)
 {
-	
+	mArgs->cl->Open();
 }
 
 void __Arm_CloseClamp(...)
 {
-	
-}
-
-void __Arm_OpenClampImpl(Clamp *clamp)
-{
-	clamp->Open();
-}
-
-void __Arm_CloseClampImpl(Clamp *clamp)
-{
-	clamp->Close();
+	mArgs->cl->Close();
 }
 
 void Arm::ToLowPegs()
@@ -129,12 +134,10 @@ void Arm::ToHighPegs()
 
 void Arm::OpenClamp()
 {
-	// TODO: Base off of sensor values, don't assume
-	ARM_CLAMP_CHANGE_TASK(__Arm_OpenClamp, (UINT32)(&mArgs));
+	ARM_CLAMP_CHANGE_TASK(__Arm_OpenClamp);
 }
 
 void Arm::CloseClamp()
 {
-	// TODO: Base off of sensor values, don't assume
-	ARM_CLAMP_CHANGE_TASK(__Arm_CloseClamp, (UINT32)(&mArgs));
+	ARM_CLAMP_CHANGE_TASK(__Arm_CloseClamp);
 }
