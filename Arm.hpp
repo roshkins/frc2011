@@ -28,14 +28,22 @@
 
 #pragma once
 #include "defs.h"
-#include "ArmJoint.hpp"
 #include "Clamp.hpp"
-#include <cstdarg>
 #include <list>
 
 class Arm
 {
 public:
+	enum ArmState
+	{
+		RETRACTED,
+		SLOT,
+		GROUND,
+		LOW_PEGS,
+		MEDIUM_PEGS,
+		HIGH_PEGS
+	};
+	
 	Arm();
 	~Arm();
 	
@@ -54,45 +62,22 @@ public:
 	bool AtLowPegs();    // 3ft
 	bool AtMediumPegs(); // 6ft
 	bool AtHighPegs();   // 9ft
+	ArmState Status();
+	Jaguar *JointMotor1();
+	Jaguar *JointMotor2();
+	Encoder *JointEncoder1();
+	Encoder *JointEncoder2();
 	
 private:
-	// Represents the state of the arm
-	enum ArmState
-	{
-		RETRACTED,
-		LOW_PEGS,
-		MEDIUM_PEGS,
-		HIGH_PEGS
-	};
-	
-	/* I really have to commend FIRST for their dedication
-	 * to a completely insane way to pass arguments. Maybe
-	 * they should have us create Jaguars by calling the
-	 * CreateVictorInstanceByReferenceImplementation method
-	 * in the ElectricServo class.
-	 * 
-	 * Why can't they just let me pass a void** in?
-	 */
-	
 	Task *mCurrentTask;     // Currently executing task
 	Task *mClampTask;       // Currently executing clamp task
 	ArmState mArmState;     // State of the arm
-	ArmJoint *mArmJoint1;   // Joint #1
-	ArmJoint *mArmJoint2;   // Joint #2
+	Jaguar *mJointMotor1;   // Joint #1
+	Jaguar *mJointMotor2;   // Joint #2
+	Encoder *mJointEncoder1;//
+	Encoder *mJointEncoder2;//
 	Clamp *mClamp;          // Clamp
 };
 
-/* I thoroughly hate that I have to do this, but unfortunately
- * they force me to use C functions as the argument to the Task
- * constructor, so I have to resort to this horrible hackery.
- */ 
-void __Arm_ToLowPegs();
-void __Arm_ToMediumPegs();
-void __Arm_ToHighPegs();
-void __Arm_OpenClamp(...);
-void __Arm_CloseClamp(...);
-
-// Unfortunately, macros calling macros is the simplest way to do this.
-#define ARM_CHANGE_TASK(__FUNC, ...) CHANGE_TASK("arm", mCurrentTask, __FUNC, __VA_ARGS__)
-#define ARM_CLAMP_CHANGE_TASK(__FUNC, ...) CHANGE_TASK("clamp", mClampTask, __FUNC, __VA_ARGS__)
+void __Arm_PID_Loop(Arm *arm);
 

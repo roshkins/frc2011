@@ -27,31 +27,19 @@
  */
 
 #include "Arm.hpp"
-
-struct DataRepHackThing
-{
-	ArmJoint *aj1;
-	ArmJoint *aj2;
-	Clamp *cl;
-};
-
-static DataRepHackThing *mArgs; // I **HATE** VxWorks; if only they could just give me an
-                                // embedded Debian system and the root password.
+#include <cmath>
 
 Arm::Arm()
 {
-	mCurrentTask = NULL;
+	mCurrentTask = new Task("arm", (FUNCPTR) __Arm_PID_Loop);
 	mClampTask = NULL;
 	mArmState = RETRACTED;
-	mArmJoint1 = new ArmJoint(ARM_MOTOR_1, ARM_ENCODER_1_1, ARM_ENCODER_1_2);
-	mArmJoint2 = new ArmJoint(ARM_MOTOR_2, ARM_ENCODER_2_1, ARM_ENCODER_2_2);
-	if (!mArgs)
-	{
-		mArgs = new DataRepHackThing();
-		mArgs->aj1 = mArmJoint1;
-		mArgs->aj2 = mArmJoint2;
-		mArgs->cl = mClamp;
-	}
+	mJointMotor1 = new Jaguar(ARM_MOTOR_1);
+	//mJointEncoder1 = new Encoder(ARM_ENCODER_1_1, ARM_ENCODER_1_2);
+	mJointMotor2 = new Jaguar(ARM_MOTOR_2);
+	//mJointEncoder2 = new Encoder(ARM_ENCODER_2_1, ARM_ENCODER_2_2);
+	
+	mCurrentTask->Start((UINT32) this);
 }
 
 Arm::~Arm()
@@ -85,59 +73,97 @@ bool Arm::AtHighPegs()
 	return (mArmState == HIGH_PEGS);
 }
 
-// All of these are called async
-void __Arm_ToLowPegs()
+Arm::ArmState Arm::Status()
 {
-	// TODO: Implement Arm::ToLowPegs
+	return mArmState;
 }
 
-void __Arm_ToMediumPegs()
+Jaguar *Arm::JointMotor1()
 {
-	// TODO: Implement Arm::ToMediumPegs
+	return mJointMotor1;
 }
 
-void __Arm_ToHighPegs()
+Jaguar *Arm::JointMotor2()
 {
-	// TODO: Implement Arm::ToHighPegs
+	return mJointMotor2;
 }
 
-void __Arm_OpenClamp(...)
+Encoder *Arm::JointEncoder1()
 {
-	mArgs->cl->Open();
+	return mJointEncoder1;
 }
 
-void __Arm_CloseClamp(...)
+Encoder *Arm::JointEncoder2()
 {
-	mArgs->cl->Close();
+	return mJointEncoder2;
+}
+
+
+void __Arm_PID_Loop(Arm *arm, ...)
+{
+	double aj1_v, aj2_v, aj1_vo, aj2_vo, aj1_t, aj2_t, aj1_m = 360 * 1000, aj2_m = 360 * 2.5, aj1_p, aj2_p;
+	Arm::ArmState as_p, as_c;
+	
+	arm->JointEncoder1()->Reset();
+	arm->JointEncoder2()->Reset();
+	
+	while (true)
+	{
+		aj1_v = arm->JointEncoder1()->Get();
+		aj2_v = arm->JointEncoder2()->Get();
+		as_c = arm->Status();
+		
+		if (as_c != as_p)
+		{
+			switch (as_c)
+			{
+			case Arm::RETRACTED:
+				aj1_t = 0;
+				aj2_t = 0;
+			case Arm::SLOT:
+				break;
+			case Arm::GROUND:
+				break;
+			case Arm::LOW_PEGS:
+				break;
+			case Arm::MEDIUM_PEGS:
+				break;
+			case Arm::HIGH_PEGS:
+				break;
+			}
+		}
+		
+		aj1_p = log(((aj1_v - aj1_t) * 10) / aj1_m);
+		aj2_p = log(((aj2_v - aj2_t) * 10) / aj2_m);
+		
+		arm->JointMotor1()->Set(aj1_p);
+		arm->JointMotor2()->Set(aj2_p);
+		
+		as_p = as_c;
+		aj1_vo = aj1_v;
+		aj2_vo = aj2_v;
+	}
 }
 
 void Arm::ToLowPegs()
 {
-	// TODO: Base off of sensor values, don't assume
 	mArmState = LOW_PEGS;
-	ARM_CHANGE_TASK(__Arm_ToLowPegs);
 }
 
 void Arm::ToMediumPegs()
 {
-	// TODO: Base off of sensor values, don't assume
 	mArmState = MEDIUM_PEGS;
-	ARM_CHANGE_TASK(__Arm_ToMediumPegs);
 }
 
 void Arm::ToHighPegs()
 {
-	// TODO: Base off of sensor values, don't assume
 	mArmState = HIGH_PEGS;
-	ARM_CHANGE_TASK(__Arm_ToMediumPegs);
 }
 
 void Arm::OpenClamp()
 {
-	ARM_CLAMP_CHANGE_TASK(__Arm_OpenClamp);
 }
 
 void Arm::CloseClamp()
 {
-	ARM_CLAMP_CHANGE_TASK(__Arm_CloseClamp);
 }
