@@ -101,8 +101,9 @@ Encoder *Arm::JointEncoder2()
 
 void __Arm_PID_Loop(Arm *arm, ...)
 {
-	double aj1_v, aj2_v, aj1_vo, aj2_vo, aj1_t, aj2_t, aj1_m = 360 * 1000, aj2_m = 360 * 2.5, aj1_p, aj2_p;
-	Arm::ArmState as_p, as_c;
+	const double aj1_m = 360 * 1000, aj2_m = 360 * 2.5;
+	double aj1_v, aj2_v, aj1_vo, aj2_vo, aj1_t = 0, aj2_t = 0, aj1_p, aj2_p;
+	Arm::ArmState as_p = Arm::RETRACTED, as_c;
 	
 	arm->JointEncoder1()->Reset();
 	arm->JointEncoder2()->Reset();
@@ -115,26 +116,49 @@ void __Arm_PID_Loop(Arm *arm, ...)
 		
 		if (as_c != as_p)
 		{
+			// TODO: Calibrate settings
 			switch (as_c)
 			{
 			case Arm::RETRACTED:
 				aj1_t = 0;
 				aj2_t = 0;
+				break;
 			case Arm::SLOT:
+				aj1_t = 0;
+				aj2_t = 0;
 				break;
 			case Arm::GROUND:
+				aj1_t = 0;
+				aj2_t = 0;
 				break;
 			case Arm::LOW_PEGS:
+				aj1_t = 0;
+				aj2_t = 0;
 				break;
 			case Arm::MEDIUM_PEGS:
+				aj1_t = 0;
+				aj2_t = 0;
 				break;
 			case Arm::HIGH_PEGS:
+				aj1_t = 0;
+				aj2_t = 0;
+				break;
+			default:
+				// Retract it if status unknown
+				aj1_t = 0;
+				aj2_t = 0;
 				break;
 			}
 		}
 		
-		aj1_p = log(((aj1_v - aj1_t) * 10) / aj1_m);
-		aj2_p = log(((aj2_v - aj2_t) * 10) / aj2_m);
+		aj1_p = log(1 + (((aj1_v - aj1_t) * 9) / aj1_m));
+		aj2_p = log(1 + (((aj2_v - aj2_t) * 9) / aj2_m));
+		
+		// TODO: Calibrate this thing so it doesn't wiggle too much.
+		if (aj1_p < 0.1)
+			aj1_p = 0;
+		if (aj2_p < 0.1)
+			aj2_p = 0;
 		
 		arm->JointMotor1()->Set(aj1_p);
 		arm->JointMotor2()->Set(aj2_p);
@@ -162,8 +186,10 @@ void Arm::ToHighPegs()
 
 void Arm::OpenClamp()
 {
+	
 }
 
 void Arm::CloseClamp()
 {
+	
 }

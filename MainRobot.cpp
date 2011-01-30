@@ -32,7 +32,7 @@ MainRobot::MainRobot(void)
 {
 	//mDrive = new Drive();
 	mWatchdog = &GetWatchdog();
-	//mArm = new Arm();
+	mArm = new Arm();
 	mLogger = &Logger::GetInstance();
 	/*mLineSensorLeft = new DigitalInput(LINE_SENSOR_1);
 	mLineSensorCenter = new DigitalInput(LINE_SENSOR_2);
@@ -54,8 +54,8 @@ MainRobot::~MainRobot()
 
 void MainRobot::Autonomous(void)
 {
-	// @author Colin "Danger" Warren
-	mWatchdog->SetEnabled(false);
+	// We don't want another rampage, now do we?
+	mWatchdog->SetEnabled(true);
 	
 	// Follow line (automate this)
 	
