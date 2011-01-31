@@ -64,14 +64,15 @@ Clamp::ClampAction &Clamp::CurrentAction()
 
 void __Clamp_PID_Loop(Clamp *clamp, ...)
 {
-	clamp_pid_loop_start: // let thy raptors come forth from the walls and eat me
 	double cm_1 = 0.0, cm_2 = 0.0;
 	long cat = 0, cast = 0; // long cat is long
 	time_t ct;
+	bool cnt = true;
 	Clamp::ClampAction as_p = Clamp::IDLE, as_c;
 	
 	while (true)
 	{
+		cnt = true;
 		as_c = clamp->CurrentAction();
 		ct = time(NULL);
 		
@@ -90,7 +91,7 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 				if (cat > 3000)
 				{
 					clamp->CurrentAction() = Clamp::IDLE;
-					goto clamp_pid_loop_start;
+					cnt = false;
 				}
 				cat = (ct - cast);
 				cm_1 = 1.0;
@@ -102,7 +103,7 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 				if (cat > 3000)
 				{
 					clamp->CurrentAction() = Clamp::IDLE;
-					goto clamp_pid_loop_start;
+					cnt = false;
 				}
 				cat = (ct - cast);
 				cm_1 = -1.0;
@@ -114,7 +115,7 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 				if (cat > 3000)
 				{
 					clamp->CurrentAction() = Clamp::IDLE;
-					goto clamp_pid_loop_start;
+					cnt = false;
 				}
 				cat = (ct - cast);
 				cm_1 = 1.0;
@@ -126,7 +127,7 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 				if (cat > 3000)
 				{
 					clamp->CurrentAction() = Clamp::IDLE;
-					goto clamp_pid_loop_start;
+					cnt = false;
 				}
 				cat = (ct - cast);
 				cm_1 = -1.0;
@@ -138,8 +139,11 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 			}
 		}
 		
-		clamp->Motor1()->Set(cm_1);
-		clamp->Motor2()->Set(cm_2);
+		if (cnt)
+		{
+			clamp->Motor1()->Set(cm_1);
+			clamp->Motor2()->Set(cm_2);
+		}
 		
 		as_p = as_c;
 	}
