@@ -64,21 +64,15 @@ Clamp::ClampAction &Clamp::CurrentAction()
 void __Clamp_PID_Loop(Clamp *clamp, ...)
 {
 	double cm_1 = 0.0, cm_2 = 0.0;
-	long cat = 0, cast = 0; // long cat is long
-	time_t ct;
 	bool cnt = true;
 	Clamp::ClampAction as_p = Clamp::IDLE, as_c;
-	Timer timer;
+	Timer timer, at;
 	
 	timer.Start();
 	
 	while (true)
 	{
 		timer.Reset();
-		
-		cnt = true;
-		as_c = clamp->CurrentAction();
-		ct = time(NULL);
 		
 		if (as_c != as_p)
 		{
@@ -87,7 +81,6 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 			case Clamp::IDLE:
 				cm_1 = 0.0;
 				cm_2 = 0.0;
-				cast = 0;
 				break;
 			case Clamp::GRAB:
 				cm_1 = 1.0;
@@ -111,22 +104,13 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 			}
 		}
 		
-		if (as_c != Clamp::IDLE)
-		{
-			if (cast == 0)
-				cast = ct;
-			if (cat > 3000)
-			{
-				clamp->CurrentAction() = Clamp::IDLE;
-				cnt = false;
-			}	
-			cat = (ct - cast);
-		}
+		clamp->Motor1()->Set(cm_1);
+		clamp->Motor2()->Set(cm_2);
 		
-		if (cnt)
+		if (at.Get() > 3.0)
 		{
-			clamp->Motor1()->Set(cm_1);
-			clamp->Motor2()->Set(cm_2);
+			clamp->CurrentAction() = Clamp::IDLE;
+			at.Reset();
 		}
 		
 		as_p = as_c;
