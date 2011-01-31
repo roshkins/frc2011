@@ -52,6 +52,8 @@
 #define LINE_SENSOR_2 6
 #define LINE_SENSOR_3 7
 
+#define CLAMP_SWITCH 8
+
 // **************************************
 // Output
 // **************************************
@@ -62,7 +64,9 @@
 
 #define ARM_MOTOR_1 5
 #define ARM_MOTOR_2 6
-#define ARM_CLAMP 7
+
+#define CLAMP_MOTOR_1 7
+#define CLAMP_MOTOR_2 8
 
 // **************************************
 // Functions/Macros

@@ -32,12 +32,11 @@
 Arm::Arm()
 {
 	mCurrentTask = new Task("arm", (FUNCPTR) __Arm_PID_Loop);
-	mClampTask = NULL;
 	mArmState = RETRACTED;
 	mJointMotor1 = new Jaguar(ARM_MOTOR_1);
-	//mJointEncoder1 = new Encoder(ARM_ENCODER_1_1, ARM_ENCODER_1_2);
+	mJointEncoder1 = new Encoder(ARM_ENCODER_1_1, ARM_ENCODER_1_2);
 	mJointMotor2 = new Jaguar(ARM_MOTOR_2);
-	//mJointEncoder2 = new Encoder(ARM_ENCODER_2_1, ARM_ENCODER_2_2);
+	mJointEncoder2 = new Encoder(ARM_ENCODER_2_1, ARM_ENCODER_2_2);
 	
 	mCurrentTask->Start((UINT32) this);
 }
@@ -53,9 +52,9 @@ bool Arm::IsRetracted()
 	return (mArmState == RETRACTED);
 }
 
-bool Arm::IsClampOpen()
+bool Arm::ClampHasPiece()
 {
-	return mClamp->IsOpen();
+	return mClamp->HasPiece();
 }
 
 bool Arm::AtLowPegs()
@@ -184,12 +183,22 @@ void Arm::ToHighPegs()
 	mArmState = HIGH_PEGS;
 }
 
-void Arm::OpenClamp()
+void Arm::ClampGrab()
 {
-	
+	mClamp->Grab();
 }
 
-void Arm::CloseClamp()
+void Arm::ClampSpit()
 {
-	
+	mClamp->Spit();
+}
+
+void Arm::ClampRotateUp()
+{
+	mClamp->RotateUp();
+}
+
+void Arm::ClampRotateDown()
+{
+	mClamp->RotateDown();
 }

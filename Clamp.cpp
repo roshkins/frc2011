@@ -28,28 +28,144 @@
 
 #include "Clamp.hpp"
 
-Clamp::Clamp(int motor_slot, int encoder_slot1, int encoder_slot2)
+Clamp::Clamp()
 {
-	mMotor = new Jaguar(motor_slot);
-	mEncoder = new Encoder(encoder_slot1, encoder_slot2, true, Encoder::k4X);
+	mMotor1 = new Jaguar(CLAMP_MOTOR_1);
+	mMotor2 = new Jaguar(CLAMP_MOTOR_2);
+	mSwitch = new AnalogChannel(CLAMP_SWITCH);
+	mTask = new Task("clamp", (FUNCPTR) __Clamp_PID_Loop);
+	
+	mTask->Start((UINT32) this);
+	mCurrentAction = IDLE;
 }
 
 Clamp::~Clamp()
 {
-	delete mMotor;
+	delete mMotor1;
+	delete mMotor2;
+	delete mSwitch;
+	delete mTask;
 }
 
-void Clamp::Open()
+Jaguar *Clamp::Motor1()
 {
+	return mMotor1;
+}
+
+Jaguar *Clamp::Motor2()
+{
+	return mMotor2;
+}
+
+Clamp::ClampAction &Clamp::CurrentAction()
+{
+	return mCurrentAction;
+}
+
+void __Clamp_PID_Loop(Clamp *clamp, ...)
+{
+	clamp_pid_loop_start: // let thy raptors come forth from the walls and eat me
+	double cm_1 = 0.0, cm_2 = 0.0;
+	long cat = 0, cast = 0; // long cat is long
+	time_t ct;
+	Clamp::ClampAction as_p = Clamp::IDLE, as_c;
 	
+	while (true)
+	{
+		as_c = clamp->CurrentAction();
+		ct = time(NULL);
+		
+		if (as_c != as_p)
+		{
+			switch (as_c)
+			{
+			case Clamp::IDLE:
+				cm_1 = 0.0;
+				cm_2 = 0.0;
+				cast = 0;
+				break;
+			case Clamp::GRAB:
+				if (cast == 0)
+					cast = ct;
+				if (cat > 3000)
+				{
+					clamp->CurrentAction() = Clamp::IDLE;
+					goto clamp_pid_loop_start;
+				}
+				cat = (ct - cast);
+				cm_1 = 1.0;
+				cm_2 = 1.0;
+				break;
+			case Clamp::SPIT:
+				if (cast == 0)
+					cast = ct;
+				if (cat > 3000)
+				{
+					clamp->CurrentAction() = Clamp::IDLE;
+					goto clamp_pid_loop_start;
+				}
+				cat = (ct - cast);
+				cm_1 = -1.0;
+				cm_2 = -1.0;
+				break;
+			case Clamp::ROTATE_UP:
+				if (cast == 0)
+					cast = ct;
+				if (cat > 3000)
+				{
+					clamp->CurrentAction() = Clamp::IDLE;
+					goto clamp_pid_loop_start;
+				}
+				cat = (ct - cast);
+				cm_1 = 1.0;
+				cm_2 = -1.0;
+				break;
+			case Clamp::ROTATE_DOWN:
+				if (cast == 0)
+					cast = ct;
+				if (cat > 3000)
+				{
+					clamp->CurrentAction() = Clamp::IDLE;
+					goto clamp_pid_loop_start;
+				}
+				cat = (ct - cast);
+				cm_1 = -1.0;
+				cm_2 = 1.0;
+				break;
+			default:
+				clamp->CurrentAction() = Clamp::IDLE;
+				continue;
+			}
+		}
+		
+		clamp->Motor1()->Set(cm_1);
+		clamp->Motor2()->Set(cm_2);
+		
+		as_p = as_c;
+	}
 }
 
-void Clamp::Close()
+void Clamp::Grab()
 {
-	
+	mCurrentAction = GRAB;
 }
 
-bool Clamp::IsOpen()
+void Clamp::Spit()
 {
-	return (mState == OPEN);
+	mCurrentAction = SPIT;
+}
+
+void Clamp::RotateUp()
+{
+	mCurrentAction = ROTATE_UP;
+}
+
+void Clamp::RotateDown()
+{
+	mCurrentAction = ROTATE_DOWN;
+}
+
+bool Clamp::HasPiece()
+{
+	return mSwitch->GetVoltage() > 1.0f;
 }

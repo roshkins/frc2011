@@ -31,21 +31,33 @@
 class Clamp
 {
 public:
-	Clamp(int motor_slot, int encoder_slot1, int encoder_slot2);
-	~Clamp();
-	
-	void Open();
-	void Close();
-	bool IsOpen();
-private:
-	// Represents the state of the clamp
-	enum ClampState
+	enum ClampAction
 	{
-		OPEN,
-		CLOSED
+		IDLE,
+		GRAB,
+		SPIT,
+		ROTATE_UP,
+		ROTATE_DOWN
 	};
 	
-	ClampState mState;
-	Jaguar *mMotor;
-	Encoder *mEncoder;
+	Clamp();
+	~Clamp();
+	
+	Jaguar *Motor1();
+	Jaguar *Motor2();
+	
+	void Grab();
+	void Spit();
+	void RotateUp();
+	void RotateDown();
+	bool HasPiece();
+	ClampAction &CurrentAction();
+private:
+	Jaguar *mMotor1;
+	Jaguar *mMotor2;
+	AnalogChannel *mSwitch;
+	Task *mTask;
+	ClampAction mCurrentAction;
 };
+
+void __Clamp_PID_Loop(Clamp *clamp, ...);

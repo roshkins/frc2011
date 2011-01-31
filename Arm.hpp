@@ -53,12 +53,14 @@ public:
 	void ToHighPegs();   // 9ft
 	
 	// Opens and closes the clamp
-	void OpenClamp();
-	void CloseClamp();
+	void ClampGrab();
+	void ClampSpit();
+	void ClampRotateUp();
+	void ClampRotateDown();
 	
 	// Data getters
 	bool IsRetracted();
-	bool IsClampOpen();
+	bool ClampHasPiece();
 	bool AtLowPegs();    // 3ft
 	bool AtMediumPegs(); // 6ft
 	bool AtHighPegs();   // 9ft
@@ -70,7 +72,6 @@ public:
 	
 private:
 	Task *mCurrentTask;     // Currently executing task
-	Task *mClampTask;       // Currently executing clamp task
 	ArmState mArmState;     // State of the arm
 	Jaguar *mJointMotor1;   // Joint #1
 	Jaguar *mJointMotor2;   // Joint #2
