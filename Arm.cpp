@@ -103,12 +103,15 @@ void __Arm_PID_Loop(Arm *arm, ...)
 	const double aj1_m = 360 * 1000, aj2_m = 360 * 2.5;
 	double aj1_v, aj2_v, aj1_vo, aj2_vo, aj1_t = 0, aj2_t = 0, aj1_p, aj2_p;
 	Arm::ArmState as_p = Arm::RETRACTED, as_c;
+	Timer timer;
 	
 	arm->JointEncoder1()->Reset();
 	arm->JointEncoder2()->Reset();
+	timer.Start();
 	
 	while (true)
 	{
+		timer.Reset();
 		aj1_v = arm->JointEncoder1()->Get();
 		aj2_v = arm->JointEncoder2()->Get();
 		as_c = arm->Status();
@@ -165,6 +168,9 @@ void __Arm_PID_Loop(Arm *arm, ...)
 		as_p = as_c;
 		aj1_vo = aj1_v;
 		aj2_vo = aj2_v;
+		
+		if (timer.Get() < 0.0050)
+			Wait(0.0050 - timer.Get());
 	}
 }
 

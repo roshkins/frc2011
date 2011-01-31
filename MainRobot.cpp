@@ -68,27 +68,21 @@ void MainRobot::OperatorControl(void)
 	// Enables the watchdog (if comms are dropped, commit suicide)
 	mWatchdog->SetEnabled(false);
 	
-	time_t startTime;
+	Timer timer;
 	
 	mTestJag1->Set(1.0f);
 	mTestJag2->Set(1.0f);
+	timer.Start();
 	
 	while (IsOperatorControl())
 	{
-		// Grab start time
-		startTime = time(NULL);
+		timer.Reset();
 		
 		mWatchdog->Feed();
 		mDrive->Update();
 		
-		Wait(0.05);
-		
-		// Main loop time should be 50ms, if greater, log a warning
-		if (time(NULL) > startTime + 0.005)
-			mLogger->warning("Main loop took more than 5ms!");
-		else
-			Wait((startTime + 0.005) - time(NULL));
-		//mLogger->info("Test prog.");
+		if (timer.Get() < 0.0050)
+			Wait(0.0050 - timer.Get());
 	}
 	mTestJag1->Set(0.0f);
 	mTestJag2->Set(0.0f);

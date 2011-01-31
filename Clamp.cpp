@@ -68,9 +68,14 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 	time_t ct;
 	bool cnt = true;
 	Clamp::ClampAction as_p = Clamp::IDLE, as_c;
+	Timer timer;
+	
+	timer.Start();
 	
 	while (true)
 	{
+		timer.Reset();
+		
 		cnt = true;
 		as_c = clamp->CurrentAction();
 		ct = time(NULL);
@@ -125,6 +130,9 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 		}
 		
 		as_p = as_c;
+		
+		if (timer.Get() < 0.0050)
+			Wait(0.0050 - timer.Get());
 	}
 }
 
