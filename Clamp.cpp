@@ -86,50 +86,18 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 				cast = 0;
 				break;
 			case Clamp::GRAB:
-				if (cast == 0)
-					cast = ct;
-				if (cat > 3000)
-				{
-					clamp->CurrentAction() = Clamp::IDLE;
-					cnt = false;
-				}
-				cat = (ct - cast);
 				cm_1 = 1.0;
 				cm_2 = 1.0;
 				break;
 			case Clamp::SPIT:
-				if (cast == 0)
-					cast = ct;
-				if (cat > 3000)
-				{
-					clamp->CurrentAction() = Clamp::IDLE;
-					cnt = false;
-				}
-				cat = (ct - cast);
 				cm_1 = -1.0;
 				cm_2 = -1.0;
 				break;
 			case Clamp::ROTATE_UP:
-				if (cast == 0)
-					cast = ct;
-				if (cat > 3000)
-				{
-					clamp->CurrentAction() = Clamp::IDLE;
-					cnt = false;
-				}
-				cat = (ct - cast);
 				cm_1 = 1.0;
 				cm_2 = -1.0;
 				break;
 			case Clamp::ROTATE_DOWN:
-				if (cast == 0)
-					cast = ct;
-				if (cat > 3000)
-				{
-					clamp->CurrentAction() = Clamp::IDLE;
-					cnt = false;
-				}
-				cat = (ct - cast);
 				cm_1 = -1.0;
 				cm_2 = 1.0;
 				break;
@@ -137,6 +105,18 @@ void __Clamp_PID_Loop(Clamp *clamp, ...)
 				clamp->CurrentAction() = Clamp::IDLE;
 				continue;
 			}
+		}
+		
+		if (as_c != Clamp::IDLE)
+		{
+			if (cast == 0)
+				cast = ct;
+			if (cat > 3000)
+			{
+				clamp->CurrentAction() = Clamp::IDLE;
+				cnt = false;
+			}	
+			cat = (ct - cast);
 		}
 		
 		if (cnt)
