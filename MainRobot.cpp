@@ -57,10 +57,8 @@ void MainRobot::Autonomous(void)
 	// We don't want another rampage, now do we?
 	mWatchdog->SetEnabled(true);
 	
-	// Follow line (automate this)
-	
-	// Raise Arm to highest pegs
-	//mArm->ToHighPegs();
+	AutonomousController ac;
+	ac.Run();
 }
 
 void MainRobot::OperatorControl(void)

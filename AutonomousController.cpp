@@ -1,6 +1,6 @@
-#include "Autonomous.hpp"
+#include "AutonomousController.hpp"
 
-Autonomous::Autonomous()
+AutonomousController::AutonomousController()
 {
 	mRobotDrive = new RobotDrive(DRIVE_MOTOR_1, DRIVE_MOTOR_2, DRIVE_MOTOR_3, DRIVE_MOTOR_4);
 	mLineSensorLeft = new DigitalInput(LINE_SENSOR_1);
@@ -10,18 +10,18 @@ Autonomous::Autonomous()
 	mLogger = &Logger::GetInstance();
 }
 
-void Autonomous::run()
+void AutonomousController::Run()
 {
 	LineFollow();
 	PlaceGamePiece();
 }
 
-void Autonomous::LineFollow()
+void AutonomousController::LineFollow()
 {
 	
 }
 
-void Autonomous::PlaceGamePiece()
+void AutonomousController::PlaceGamePiece()
 {
 	
 }

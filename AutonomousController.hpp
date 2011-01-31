@@ -29,12 +29,12 @@
 #include "defs.h"
 #include "Arm.hpp"
 
-class Autonomous
+class AutonomousController
 {
 public:
-	Autonomous();
+	AutonomousController();
 	
-	void run();
+	void Run();
 private:
 	void LineFollow();
 	void PlaceGamePiece();

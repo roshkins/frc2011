@@ -29,6 +29,7 @@
 #include "defs.h"
 #include "Arm.hpp"
 #include "Drive.hpp"
+#include "AutonomousController.hpp"
 
 class MainRobot : public SimpleRobot
 {
