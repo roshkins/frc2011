@@ -46,3 +46,15 @@ private:
 	Arm *mArm;
 	Logger *mLogger;
 };
+
+/*enum SensorPosition
+{
+	P001
+	P010
+	P011
+	P100
+	P101
+	P110
+	P111
+	P000
+} ;*/
